@@ -1,9 +1,8 @@
-from model.card import Card
+from typing import Tuple
+from storages.mongo import Card, CardManager
 
-cards = [Card('1', 'q', 'a')]
 
-
-def add_card(user_id: int, message: str):
+def add_card(user_id: int, message: str) -> Tuple[str, str]:
     if len(message.split('-/-')) != 2:
         raise ValueError(
             'Wrong command format.\nMessage must contain exactly one `-/-` separator and non empty text on both sides.')
@@ -13,21 +12,15 @@ def add_card(user_id: int, message: str):
         raise ValueError('Wrong command format.\nFirst part is empty')
     if not second_part:
         raise ValueError('Wrong command format.\nSecond part is empty')
-    cards.append(Card(user_id, first_part, second_part))
+    Card(question=first_part, answer=second_part, user=user_id).save()
     return first_part, second_part
 
 
 def current_top():
-    return min(cards, key=lambda card: card.deadline)
-
+    return CardManager().cards.find().sort({'deadline': 1}).limit(1)
 
 def guess_wrong(card):
-    cards.remove(card)
-    card.update_level(-1)
-    cards.append(card)
-
+    CardManager().cards.update_level(card, -1)
 
 def guess_correct(card):
-    cards.remove(card)
-    card.update_level(1)
-    cards.append(card)
+    CardManager().cards.update_level(card, 1)
