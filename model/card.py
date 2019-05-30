@@ -1,10 +1,10 @@
 from datetime import datetime
 
 
-class Card(object):
-    def __init__(self, user_id, top, bottom):
+class Card:
+    def __init__(self, user_id: int, question: str, answer: str):
         self.user_id = user_id
-        self.top = top
-        self.bottom = bottom
+        self.question = question
+        self.answer = answer
         self.level = 0
         self.deadline = datetime.now()
