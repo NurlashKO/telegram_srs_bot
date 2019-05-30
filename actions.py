@@ -18,12 +18,16 @@ def add_card(user_id: int, message: str):
 
 
 def current_top():
-    return cards[-1]
+    return min(cards, key=lambda card: card.deadline)
 
 
-def next_card():
-    global cards
-    card = cards[-1]
-    cards.pop()
-    cards = [card] + cards
-    return cards[-1]
+def guess_wrong(card):
+    cards.remove(card)
+    card.update_level(-1)
+    cards.append(card)
+
+
+def guess_correct(card):
+    cards.remove(card)
+    card.update_level(1)
+    cards.append(card)

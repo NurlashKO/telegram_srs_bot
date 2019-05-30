@@ -1,7 +1,7 @@
 import telebot
 from telebot import types
 
-from actions import add_card, current_top, next_card
+from actions import add_card, current_top, guess_correct, guess_wrong
 
 bot = telebot.TeleBot('849639836:AAETYUnkEBESn6EfQcxjgcC_l4c_kBDFcMY')
 
@@ -40,21 +40,21 @@ markup.add(forgot_response, remember_response)
 
 
 @bot.message_handler(commands=['learn'])
-def handle_revise(message):
+def handle_learn(message):
     top_question = current_top().top
     bot.send_message(message.chat.id, top_question, reply_markup=markup)
 
 
 @bot.message_handler(commands=['chotto'])
 def handle_forgot(message):
-    next_card()
-    handle_revise(message)
+    guess_wrong(current_top())
+    handle_learn(message)
 
 
 @bot.message_handler(commands=['kantanna'])
 def handle_remember(message):
-    next_card()
-    handle_revise(message)
+    guess_correct(current_top())
+    handle_learn(message)
 
 
 bot.polling()
