@@ -4,9 +4,13 @@ from telebot import types
 from actions import add_card, current_top, next_card
 
 bot = telebot.TeleBot('849639836:AAETYUnkEBESn6EfQcxjgcC_l4c_kBDFcMY')
+markup = types.ReplyKeyboardMarkup(row_width=2)
+forgot_response = types.KeyboardButton('/chotto')
+remember_response = types.KeyboardButton('/kantanna')
+markup.add(forgot_response, remember_response)
 
 
-@bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=('start', 'help',))
 def send_welcome(message):
     bot.reply_to(message, """Hey, I am here to help you with memorizing stuff.
 Add your words using the following command:
@@ -23,7 +27,7 @@ HF ;)
     """)
 
 
-@bot.message_handler(commands=['add'])
+@bot.message_handler(commands=('add',))
 def handle_add(message):
     clear_message = message.text.split(' ', 1)[1]
     try:
@@ -33,28 +37,23 @@ def handle_add(message):
         bot.reply_to(message, err)
 
 
-markup = types.ReplyKeyboardMarkup(row_width=2)
-forgot_response = types.KeyboardButton('/chotto')
-remember_response = types.KeyboardButton('/kantanna')
-markup.add(forgot_response, remember_response)
-
-
-@bot.message_handler(commands=['learn'])
+@bot.message_handler(commands=('learn',))
 def handle_revise(message):
     top_question = current_top().top
-    bot.send_message(message.chat.id, top_question, reply_markup=markup)
+    bot.send_message(chat_id=message.chat.id, text=top_question, reply_markup=markup)
 
 
-@bot.message_handler(commands=['chotto'])
+@bot.message_handler(commands=('hard',))
 def handle_forgot(message):
     next_card()
     handle_revise(message)
 
 
-@bot.message_handler(commands=['kantanna'])
+@bot.message_handler(commands=('good',))
 def handle_remember(message):
     next_card()
     handle_revise(message)
 
 
-bot.polling()
+if __name__ == '__main__':
+    bot.polling()
