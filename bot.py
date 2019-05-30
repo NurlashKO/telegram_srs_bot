@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
-from actions import add_card
+
+from actions import add_card, current_top, next_card
 
 bot = telebot.TeleBot('849639836:AAETYUnkEBESn6EfQcxjgcC_l4c_kBDFcMY')
 
@@ -21,20 +22,39 @@ To get back to your reviews use command:
 HF ;)
     """)
 
+
 @bot.message_handler(commands=['add'])
 def handle_add(message):
-    clear_message = message.text.split(' ')[1]
+    clear_message = message.text.split(' ', 1)[1]
     try:
-        question, answer = add_card(clear_message)
+        question, answer = add_card(message.chat.id, clear_message)
         bot.send_message(message.chat.id, "Added.\n\nQuestion:\n{}\n\nAnswer:\n{}".format(question, answer))
     except ValueError as err:
         bot.reply_to(message, err)
 
 
 markup = types.ReplyKeyboardMarkup(row_width=2)
-itembtn1 = types.KeyboardButton('a')
-itembtn2 = types.KeyboardButton('v')
-itembtn3 = types.KeyboardButton('d')
-markup.add(itembtn1, itembtn2, itembtn3)
+forgot_response = types.KeyboardButton('/chotto')
+remember_response = types.KeyboardButton('/kantanna')
+markup.add(forgot_response, remember_response)
+
+
+@bot.message_handler(commands=['learn'])
+def handle_revise(message):
+    top_question = current_top().top
+    bot.send_message(message.chat.id, top_question, reply_markup=markup)
+
+
+@bot.message_handler(commands=['chotto'])
+def handle_forgot(message):
+    next_card()
+    handle_revise(message)
+
+
+@bot.message_handler(commands=['kantanna'])
+def handle_remember(message):
+    next_card()
+    handle_revise(message)
+
 
 bot.polling()
