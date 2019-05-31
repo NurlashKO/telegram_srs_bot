@@ -5,8 +5,8 @@ from actions import add_card, current_top, guess_correct, guess_wrong
 
 bot = telebot.TeleBot('849639836:AAETYUnkEBESn6EfQcxjgcC_l4c_kBDFcMY')
 markup = types.ReplyKeyboardMarkup(row_width=2)
-forgot_response = types.KeyboardButton('/chotto')
-remember_response = types.KeyboardButton('/kantanna')
+forgot_response = types.KeyboardButton('/hard')
+remember_response = types.KeyboardButton('/good')
 markup.add(forgot_response, remember_response)
 
 
@@ -39,7 +39,7 @@ def handle_add(message):
 
 @bot.message_handler(commands=('learn',))
 def handle_learn(message):
-    top_question = current_top().top
+    top_question = current_top()["question"]
     bot.send_message(chat_id=message.chat.id, text=top_question, reply_markup=markup)
 
 

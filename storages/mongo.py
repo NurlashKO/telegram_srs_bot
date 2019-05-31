@@ -24,13 +24,15 @@ class CardManager:
         self.cards = MongoClient('mongodb://user:pass@mongo:27017/').db.cards
 
     def add(self, user_id: int, question: str, answer: str) -> None:
-        card = {'user_id': user_id, 'question': question, 'answer': answer, 'level': 0, 'deadline': datetime.now().timestamp()}
+        card = {'user_id': user_id, 'question': question, 'answer': answer, 'level': 0,
+                'deadline': datetime.now().timestamp()}
         self.cards.insert_one(card)
 
     def count(self):
         return self.cards.count_documents({})
 
     def update_level(self, card, value):
-        card.level = max(0, min(card.level + value, len(level_deadlines) - 1))
-        card.deadline = datetime.now() + level_deadlines[card.level]
-        self.cards.update_one({'_id': card._id}, {'$set': card}, upsert=False)
+        print(card)
+        card["level"] = max(0, min(card["level"] + value, len(level_deadlines) - 1))
+        card["deadline"] = (datetime.now() + level_deadlines[card["level"]]).timestamp()
+        self.cards.update_one({'_id': card["_id"]}, {'$set': card}, upsert=False)

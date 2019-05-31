@@ -1,5 +1,6 @@
 from typing import Tuple
-from storages.mongo import Card, CardManager
+
+from storages.mongo import CardManager
 
 
 def add_card(user_id: int, message: str) -> Tuple[str, str]:
@@ -12,15 +13,17 @@ def add_card(user_id: int, message: str) -> Tuple[str, str]:
         raise ValueError('Wrong command format.\nFirst part is empty')
     if not second_part:
         raise ValueError('Wrong command format.\nSecond part is empty')
-    Card(question=first_part, answer=second_part, user=user_id).save()
+    CardManager().add(question=first_part, answer=second_part, user_id=user_id)
     return first_part, second_part
 
 
 def current_top():
-    return CardManager().cards.find().sort({'deadline': 1}).limit(1)
+    return CardManager().cards.find().sort('deadline', 1)[0]
+
 
 def guess_wrong(card):
-    CardManager().cards.update_level(card, -1)
+    CardManager().update_level(card, -1)
+
 
 def guess_correct(card):
-    CardManager().cards.update_level(card, 1)
+    CardManager().update_level(card, 1)
