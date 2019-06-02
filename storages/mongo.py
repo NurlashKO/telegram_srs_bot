@@ -3,6 +3,7 @@ from os import getenv
 from typing import Dict
 
 from pymongo import MongoClient
+from telebot.types import Message
 
 LEVEL_DEADLINES = (
     timedelta(seconds=0),
@@ -36,9 +37,12 @@ class CardManager(metaclass=Singleton):
         password = getenv('MONGO_PASSWORD')
         self.cards = MongoClient(f'mongodb://{username}:{password}@mongo:27017/').db.cards
 
-    def add(self, chat_id: int, question: str, answer: str) -> None:
+    def add(self, chat_id: int, question, answer) -> None:
         card = {
-            'chat_id': chat_id, 'question': question, 'answer': answer, 'level': 0,
+            'chat_id': chat_id,
+            'question': {'from_chat_id': question['chat']['id'], 'message_id': question['message_id']},
+            'answer': {'from_chat_id': answer['chat']['id'], 'message_id': answer['message_id']},
+            'level': 0,
             'deadline': datetime.now().timestamp()
         }
         self.cards.insert_one(card)
@@ -55,3 +59,31 @@ class CardManager(metaclass=Singleton):
         return self.cards.find(
             {'chat_id': chat_id}
         ).sort(key_or_list='deadline', direction=1)[0]
+
+
+class UserManager(metaclass=Singleton):
+    LEARNING_STATE = 'learning'
+    ADD_CARD_QUESTION = 'add_card_question'
+    ADD_CARD_ANSWER = 'add_card_answer'
+
+    def __init__(self):
+        self.users = MongoClient('mongodb://user:pass@mongo:27017/').db.users
+
+    def create(self, chat_id: int, user_id: int) -> None:
+        user = {'chat_id': chat_id, 'user_id': user_id, 'state': self.LEARNING_STATE, 'tmp_message': {}}
+        self.users.insert_one(user)
+
+    def getUser(self, chat_id: int, user_id: int):
+        return self.users.find({'chat_id': chat_id, 'user_id': user_id})[0]
+
+    def setUserState(self, chat_id: int, user_id: int, state):
+        self.users.update_one({'chat_id': chat_id, 'user_id': user_id}, {'$set': {'state': state}}, upsert=False)
+
+    def saveQuestion(self, message: Message):
+        self.users.update_one({'chat_id': message.chat.id, 'user_id': message.from_user.id},
+                              {'$set': {
+                                  'tmp_message': {'chat': {'id': message.chat.id}, 'message_id': message.message_id}}},
+                              upsert=False)
+
+    def getSavedQuestion(self, message: Message):
+        return self.users.find({'chat_id': message.chat.id, 'user_id': message.from_user.id})[0]['tmp_message']
