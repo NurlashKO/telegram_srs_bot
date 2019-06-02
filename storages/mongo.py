@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from os import getenv
 from typing import Dict
 
 from pymongo import MongoClient
@@ -31,7 +32,9 @@ class Singleton(type):
 
 class CardManager(metaclass=Singleton):
     def __init__(self):
-        self.cards = MongoClient('mongodb://user:pass@mongo:27017/').db.cards
+        username = getenv('MONGO_USERNAME')
+        password = getenv('MONGO_PASSWORD')
+        self.cards = MongoClient(f'mongodb://{username}:{password}@mongo:27017/').db.cards
 
     def add(self, chat_id: int, question: str, answer: str) -> None:
         card = {

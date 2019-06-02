@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    volumes:
+      - ./db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 0veehGRkFlovfxqmeU6gye3EKET1QlgQ
+      MONGO_INITDB_ROOT_PASSWORD: GLnsuhtjECEehqHOkG7eGoGdZAesIF1w
+
+  admin_mongo:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_AUTH_DATABASE: db
+      ME_CONFIG_MONGODB_AUTH_USERNAME: ZAYQW5haZbqgN7fUHK0zXd5w02jvR928
+      ME_CONFIG_MONGODB_AUTH_PASSWORD: PWYCyEQDWwuaZOyR6ydgS6itY7cbLUil
+      ME_CONFIG_MONGODB_ADMINUSERNAME: 0veehGRkFlovfxqmeU6gye3EKET1QlgQ
+      ME_CONFIG_MONGODB_ADMINPASSWORD: GLnsuhtjECEehqHOkG7eGoGdZAesIF1w
+
+  bot:
+    image: muslimbeibytuly/srs_bot:master
+    command: bash -c "python bot.py"
+    depends_on:
+      - mongo
+    environment:
+      MONGO_USERNAME: 0veehGRkFlovfxqmeU6gye3EKET1QlgQ
+      MONGO_PASSWORD: GLnsuhtjECEehqHOkG7eGoGdZAesIF1w

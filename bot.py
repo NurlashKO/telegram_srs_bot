@@ -1,7 +1,5 @@
 from telebot import TeleBot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton, Message
-
-from actions import guess_correct, guess_wrong
 from storages.mongo import CardManager
 from storages.sanitizers import question_and_answer_from
 
